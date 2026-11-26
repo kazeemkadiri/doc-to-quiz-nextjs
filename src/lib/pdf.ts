@@ -1,8 +1,11 @@
-import { PDFParse } from "pdf-parse";
+import { getDocumentProxy, extractText } from "unpdf";
 
-export async function extractText(buffer: Buffer): Promise<string> {
-  const data = await new PDFParse(buffer);
-  return (await data.getText()).text.replace(/\s+/g, " ").trim();
+export async function extractPDFText(buffer: Uint8Array): Promise<string> {
+  const bytes = new Uint8Array(buffer);
+  const pdf = await getDocumentProxy(bytes);
+  const { text } = await extractText(pdf, { mergePages: true });
+
+  return text;
 }
 
 // Split long text into chunks so each LLM call stays within limits
